@@ -8,8 +8,8 @@ from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.executor import start_webhook
 
 
-API_TOKEN = os.getenv('BOT_TOKEN')
-HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
+API_TOKEN = str(os.getenv('BOT_TOKEN'))
+HEROKU_APP_NAME = str(os.getenv('HEROKU_APP_NAME'))
 
 # webhook settings
 WEBHOOK_HOST = f'https://{HEROKU_APP_NAME}.herokuapp.com'
