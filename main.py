@@ -9,20 +9,22 @@ from aiogram.utils.executor import start_webhook
 
 
 API_TOKEN = str(os.getenv('BOT_TOKEN'))
+#print(API_TOKEN)
 HEROKU_APP_NAME = str(os.getenv('HEROKU_APP_NAME'))
 
 # webhook settings
 WEBHOOK_HOST = f'https://{HEROKU_APP_NAME}.herokuapp.com'
-WEBHOOK_PATH = f'/{API_TOKEN}'
+WEBHOOK_PATH = f'/webhook/{API_TOKEN}'
 WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 
 # webserver settings
-WEBAPP_HOST = 'localhost'  # or ip
-WEBAPP_PORT = 3001
+WEBAPP_HOST = '0.0.0.0'  # or ip
+WEBAPP_PORT = int(os.getenv("PORT"))
 
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
+bot.set_webhook(WEBHOOK_URL)
 dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())
 
