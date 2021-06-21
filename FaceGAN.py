@@ -53,7 +53,7 @@ class FaceGAN:
         self.model.load_state_dict(torch.load('genr3m128p10e.model', map_location=self.device))
         self.model.eval()
 
-    def get_image(self):
+    async def get_image(self):
         fixed_latent = torch.randn(1, 512, 1, 1, device=self.device)
 
         with torch.no_grad():
