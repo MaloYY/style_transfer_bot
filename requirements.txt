@@ -3,5 +3,5 @@ aiohttp==3.7.4
 async-timeout==3.0.1
 attrs==21.2.0
 numpy~=1.20.1
-torch-cpu~=1.9.0
-torchvision-cpu~=0.10.0
+torch~=1.9.0+cpu
+torchvision~=0.10.0+cpu
