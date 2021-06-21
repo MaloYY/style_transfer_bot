@@ -9,7 +9,6 @@ from aiogram.utils.executor import start_webhook
 
 
 API_TOKEN = str(os.getenv('BOT_TOKEN'))
-#print(API_TOKEN)
 HEROKU_APP_NAME = str(os.getenv('HEROKU_APP_NAME'))
 
 # webhook settings
@@ -31,25 +30,23 @@ dp.middleware.setup(LoggingMiddleware())
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
-    """Отправляет приветственное сообщение и помощь по боту"""
     await message.answer('Hello ;)')
 
-@dp.message_handler()
-async def echo(message: types.Message):
-    logging.warning(f'Recieved a message from {message.from_user}')
-    await bot.send_message(message.chat.id, message.text)
+
+@dp.message_handler(commands=['generate'])
+async def send_welcome(message: types.Message):
+    
+    if os.path.isfile(f'images/fake.jpg'):
+        await bot.send_photo(chat_id=message.from_user.id, photo=open('images/fake.jpg', 'rb'))
 
 
 async def on_startup(dp):
-    logging.warning(
-        'Starting connection. ')
-    await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
+    logging.warning('Starting connection.')
+    await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
 
 
 async def on_shutdown(dp):
     logging.warning('Shutting down..')
-
-    # insert code here to run it before shutdown
 
     # Remove webhook (not acceptable in some cases)
     await bot.delete_webhook()
@@ -71,4 +68,3 @@ if __name__ == '__main__':
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
     )
-    #executor.start_polling(dp, skip_updates=True) # delete
