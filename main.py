@@ -60,7 +60,7 @@ async def send_welcome(message: types.Message):
     generator = FaceGAN()
     await generator.get_image()
     if os.path.isfile(f'images/fake.jpg'):
-        #time.sleep(5)
+        time.sleep(5)
         await bot.send_photo(chat_id=message.from_user.id, photo=open('images/fake.jpg', 'rb'))
     else:
         await message.answer("Didn't find the result")
