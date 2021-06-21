@@ -1,6 +1,6 @@
 import logging
 import os
-import time
+import asyncio
 
 from aiogram import Bot, types, executor
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -10,9 +10,10 @@ from aiogram.utils.executor import start_webhook, start_polling
 
 from FaceGAN import FaceGAN
 
+# Easier to test it with pooling
+MODE = 'DEPL'  # 'LOCAL'
 
-MODE = 'DEPL'
-
+# configuration
 if MODE == 'DEPL':
     API_TOKEN = str(os.getenv('BOT_TOKEN'))
     HEROKU_APP_NAME = str(os.getenv('HEROKU_APP_NAME'))
@@ -52,15 +53,17 @@ logging.basicConfig(level=logging.INFO)
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
-    await message.answer('Hello ;)')
+    await message.answer('Привет, я генерирую лица, у меня есть следующие команды:\n\
+/start, /help - вызвать это меню.\n\
+/generate - сгенерировать случайное лицо.\n')
 
 
 @dp.message_handler(commands=['generate'])
-async def send_welcome(message: types.Message):
+async def generate(message: types.Message):
     generator = FaceGAN()
+    logging.debug('Generating')
     await generator.get_image()
     if os.path.isfile(f'images/fake.jpg'):
-        time.sleep(5)
         await bot.send_photo(chat_id=message.from_user.id, photo=open('images/fake.jpg', 'rb'))
     else:
         await message.answer("Didn't find the result")

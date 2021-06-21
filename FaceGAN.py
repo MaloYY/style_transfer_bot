@@ -1,4 +1,5 @@
 import os
+import asyncio
 import torch
 import torch.nn as nn
 from torchvision.utils import save_image
@@ -59,6 +60,8 @@ class FaceGAN:
         with torch.no_grad():
             fake_images = self.model(fixed_latent)
             save_image(fake_images, f'images/fake.jpg')
+
+        await asyncio.sleep(0)
 
     def remove_image(self):
         if os.path.isfile(f'images/fake.jpg'):
