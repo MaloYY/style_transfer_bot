@@ -38,9 +38,11 @@ async def send_welcome(message: types.Message):
 @dp.message_handler(commands=['generate'])
 async def send_welcome(message: types.Message):
     generator = FaceGAN()
-    generator.get_image()
+    await generator.get_image()
     if os.path.isfile(f'images/fake.jpg'):
         await bot.send_photo(chat_id=message.from_user.id, photo=open('images/fake.jpg', 'rb'))
+    else:
+        await message.answer("Didn't find the result")
 
 
 async def on_startup(dp):
