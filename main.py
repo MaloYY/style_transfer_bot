@@ -11,7 +11,7 @@ from aiogram.utils.executor import start_webhook, start_polling
 from FaceGAN import FaceGAN
 
 
-MODE = 'LOCAL'
+MODE = 'DEPL'
 
 if MODE == 'DEPL':
     API_TOKEN = str(os.getenv('BOT_TOKEN'))
