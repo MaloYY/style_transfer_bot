@@ -7,6 +7,8 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.executor import start_webhook
 
+import FaceGAN
+
 
 API_TOKEN = str(os.getenv('BOT_TOKEN'))
 HEROKU_APP_NAME = str(os.getenv('HEROKU_APP_NAME'))
@@ -35,7 +37,8 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler(commands=['generate'])
 async def send_welcome(message: types.Message):
-    
+    generator = FaceGAN()
+    generator.get_image()
     if os.path.isfile(f'images/fake.jpg'):
         await bot.send_photo(chat_id=message.from_user.id, photo=open('images/fake.jpg', 'rb'))
 
