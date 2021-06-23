@@ -140,8 +140,6 @@ async def process_magic(message: types.Message, state: FSMContext):
     t.start()
     await state.finish()
 
-    #await model.clear()
-
 
 async def process_transfer(message: types.Message, content_path, style_path, trans_path):
     model = StyleTransfer(content_path, style_path, message.from_user.id)
