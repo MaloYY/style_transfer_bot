@@ -122,10 +122,10 @@ async def process_style(message: types.Message, state: FSMContext):
     if not os.path.exists(f'style'):
         os.makedirs('style')
     await message.photo[-1].download(f'style/stl{str(message.from_user.id)}.jpg')
-    await process_magic(message)
+    await process_magic(message, state)
 
 
-async def process_magic(message: types.Message):
+async def process_magic(message: types.Message, state: FSMContext):
     if not os.path.exists(f'transferred'):
         os.makedirs('transferred')
     content_path = f'content/cnt{str(message.from_user.id)}.jpg'
@@ -138,7 +138,7 @@ async def process_magic(message: types.Message):
                          : asyncio.run(process_transfer(msg, content_ph, style_ph, trans_ph)),
                          args=(message, content_path, style_path, trans_path))
     t.start()
-    #await model.transfer()
+    await state.finish()
 
     #await model.clear()
 
