@@ -186,10 +186,12 @@ class StyleTransfer:
     async def clear(self):
         if os.path.isfile(self.trans_path):
             os.remove(self.trans_path)
+
         if os.path.isfile(self.content_path):
             os.remove(self.content_path)
+
         if os.path.isfile(self.style_path):
-            os.remove(self.content_path)
+            os.remove(self.style_path)
 
 
 if __name__ == '__main__':

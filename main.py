@@ -152,6 +152,7 @@ async def process_transfer(message: types.Message, content_path, style_path, tra
                              photo=open(trans_path, 'rb'))
     else:
         await message.answer("Упс.. Ошибочка вышла.")
+    await model.clear()
     await boto.close()
 
 
