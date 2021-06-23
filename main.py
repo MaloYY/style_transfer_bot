@@ -106,6 +106,8 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler(state=Form.waiting_content, content_types=['photo'])
 async def process_content(message: types.Message, state: FSMContext):
+    if not os.path.exists(f'content'):
+        os.makedirs('content')
     await message.photo[-1].download(f'content/cnt{str(message.from_user.id)}.jpg')
     await Form.waiting_style.set()
     await message.answer('Пожалуйста, пришлите фотографию c желаемым стилем'
@@ -114,6 +116,8 @@ async def process_content(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=Form.waiting_style, content_types=['photo'])
 async def process_style(message: types.Message, state: FSMContext):
+    if not os.path.exists(f'style'):
+        os.makedirs('style')
     await message.photo[-1].download(f'style/stl{str(message.from_user.id)}.jpg')
     await process_magic(message)
 
