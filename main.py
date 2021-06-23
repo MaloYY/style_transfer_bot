@@ -13,7 +13,7 @@ from FaceGAN import FaceGAN
 from EasyStyle import StyleTransfer
 
 # Easier to test it with pooling
-MODE = 'LOca'  # 'LOCAL'
+MODE = 'DEPL'  # 'LOCAL'
 
 # configuration
 if MODE == 'DEPL':
