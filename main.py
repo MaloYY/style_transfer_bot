@@ -13,7 +13,7 @@ from FaceGAN import FaceGAN
 from EasyStyle import StyleTransfer
 
 # Easier to test it with pooling
-MODE = 'DEPL'  # 'LOCAL'
+MODE = 'LOca'  # 'LOCAL'
 
 # configuration
 if MODE == 'DEPL':
@@ -123,6 +123,8 @@ async def process_style(message: types.Message, state: FSMContext):
 
 
 async def process_magic(message: types.Message):
+    if not os.path.exists(f'transferred'):
+        os.makedirs('transferred')
     content_path = f'content/cnt{str(message.from_user.id)}.jpg'
     style_path = f'style/stl{str(message.from_user.id)}.jpg'
     trans_path = f'transferred/image{str(message.from_user.id)}.jpg'
