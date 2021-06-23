@@ -7,8 +7,8 @@ from torchvision.utils import save_image
 
 class FaceGAN:
     def __init__(self):
-        if not os.path.exists(f'./images'):
-            os.makedirs('images')
+        if not os.path.exists(f'faces'):
+            os.makedirs('faces')
         self.device = torch.device('cpu')
         self.latent_size = 512
         self.generator = nn.Sequential(
@@ -59,13 +59,13 @@ class FaceGAN:
 
         with torch.no_grad():
             fake_images = self.model(fixed_latent)
-            save_image(fake_images, f'images/fake.jpg')
+            save_image(fake_images, f'faces/fake.jpg')
 
         await asyncio.sleep(0)
 
-    def remove_image(self):
-        if os.path.isfile(f'images/fake.jpg'):
-            os.remove(f'images/fake.jpg')
+    async def remove_image(self):
+        if os.path.isfile(f'faces/fake.jpg'):
+            os.remove(f'faces/fake.jpg')
 
 if __name__ == '__main__':
     inst = FaceGAN()
