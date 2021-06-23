@@ -86,8 +86,9 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
 
     model = model[:(i + 1)]
 
-    model.load_state_dict(torch.load('/model_weights/EasyST.model'))
-    model.eval()
+    #model.load_state_dict(torch.load('model_weights/EasyST.model'))
+    #model = torch.load('model_weights/EasyST1.model')
+    #model.eval()
 
     return model, style_losses, content_losses
 
@@ -100,16 +101,17 @@ def get_input_optimizer(input_img):
 
 
 def run_style_transfer(cnn, normalization_mean, normalization_std,
-                       content_img, style_img, input_img, style_layers,
+                       content_img, style_img, input_img, content_layers, style_layers,
                        num_steps=500, style_weight=100000, content_weight=1):
     """Run the style transfer."""
-    #print('Building the style transfer model..')
+    # print('Building the style transfer model..')
     model, style_losses, content_losses = get_style_model_and_losses(cnn,
-                                             normalization_mean, normalization_std,
-                                             style_img, content_img, style_layers)
+                                                                     normalization_mean, normalization_std,
+                                                                     style_img, content_img,
+                                                                     content_layers, style_layers)
     optimizer = get_input_optimizer(input_img)
 
-    #print('Optimizing..')
+    # print('Optimizing..')
     run = [0]
     while run[0] <= num_steps:
 
@@ -130,7 +132,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
             for cl in content_losses:
                 content_score += cl.loss
 
-            # взвешивание ощибки
+            # взвешивание ошибки
             style_score *= style_weight
             content_score *= content_weight
 
@@ -153,9 +155,15 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
 
     return input_img
 
+
 class StyleTransfer:
-    def __init__(self, content_path, style_path):
+    def __init__(self, content_path, style_path, user_id):
+        self.user_id = user_id
         self.imsize = 128
+
+        self.content_path = content_path
+        self.style_path = style_path
+        self.trans_path = f'transferred/image{str(self.user_id)}.jpg'
 
         self.content_img = image_loader(content_path, self.imsize)  # as well as here
         self.style_img = image_loader(style_path, self.imsize)  # измените путь на тот который у вас.
@@ -168,12 +176,15 @@ class StyleTransfer:
         self.std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
     async def transfer(self):
-        cnn = models.vgg19(pretrained=False).features.to(device).eval()
+        cnn = models.vgg19(pretrained=True).features.to(device).eval()
         output = run_style_transfer(cnn, self.mean, self.std, self.content_img, self.style_img,
-                           self.input_img, self.style_layers_default)
-        save_image(output, f'transferred/image.jpg')
+                                    self.input_img, self.content_layers_default, self.style_layers_default)
+        save_image(output, self.trans_path)
 
     async def clear(self):
-        if os.path.isfile(f'transferred/image.jpg'):
-            os.remove(f'transferred/image.jpg')
-
+        if os.path.isfile(self.trans_path):
+            os.remove(self.trans_path)
+        if os.path.isfile(self.content_path):
+            os.remove(self.content_path)
+        if os.path.isfile(self.style_path):
+            os.remove(self.content_path)
