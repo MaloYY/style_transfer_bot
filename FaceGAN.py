@@ -51,7 +51,7 @@ class FaceGAN:
         )
 
         self.model = self.generator.to(device=self.device)
-        self.model.load_state_dict(torch.load('genr3m128p10e.model', map_location=self.device))
+        self.model.load_state_dict(torch.load('model_weights/genr3m128p10e.model', map_location=self.device))
         self.model.eval()
 
     async def get_image(self):
