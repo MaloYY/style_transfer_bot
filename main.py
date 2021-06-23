@@ -1,17 +1,19 @@
 import logging
 import os
-import asyncio
 
-from aiogram import Bot, types, executor
+from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.dispatcher import Dispatcher
-from aiogram.dispatcher.webhook import SendMessage
+from aiogram.dispatcher import Dispatcher, FSMContext
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher.filters import Text
 from aiogram.utils.executor import start_webhook, start_polling
 
 from FaceGAN import FaceGAN
+from EasyStyle import StyleTransfer
 
 # Easier to test it with pooling
-MODE = 'DEPL'  # 'LOCAL'
+MODE = 'Local'  # 'LOCAL'
 
 # configuration
 if MODE == 'DEPL':
@@ -29,7 +31,7 @@ if MODE == 'DEPL':
 
     bot = Bot(token=API_TOKEN)
     bot.set_webhook(WEBHOOK_URL)
-    dp = Dispatcher(bot)
+    dp = Dispatcher(bot, storage=MemoryStorage())
     dp.middleware.setup(LoggingMiddleware())
 else:
     API_TOKEN = str(os.getenv('BOT_TOKEN'))
@@ -45,7 +47,7 @@ else:
     WEBAPP_PORT = 3001
 
     bot = Bot(token=API_TOKEN)
-    dp = Dispatcher(bot)
+    dp = Dispatcher(bot, storage=MemoryStorage())
     dp.middleware.setup(LoggingMiddleware())
 
 logging.basicConfig(level=logging.INFO)
@@ -63,8 +65,8 @@ async def generate(message: types.Message):
     generator = FaceGAN()
     logging.debug('Generating')
     await generator.get_image()
-    if os.path.isfile(f'images/fake.jpg'):
-        await bot.send_photo(chat_id=message.from_user.id, photo=open('images/fake.jpg', 'rb'))
+    if os.path.isfile(f'faces/fake.jpg'):
+        await bot.send_photo(chat_id=message.from_user.id, photo=open('faces/fake.jpg', 'rb'))
     else:
         await message.answer("Didn't find the result")
 
@@ -87,6 +89,67 @@ async def on_shutdown(dp):
     await dp.storage.wait_closed()
 
     logging.warning('Bye! Shutting down webhook connection')
+
+
+class Form(StatesGroup):
+    waiting_content = State()
+    waiting_style = State()
+    magic = State()
+
+
+@dp.message_handler(commands=['style'])
+async def send_welcome(message: types.Message):
+    await Form.waiting_content.set()
+    await message.answer('Пожалуйста, пришлите фотографию для которой будем менять стиль.'
+                         'Для отмены используйте /cancel')
+
+
+@dp.message_handler(state=Form.waiting_content, content_types=['photo'])
+async def process_content(message: types.Message, state: FSMContext):
+    await message.photo[-1].download(f'content/cnt{str(message.from_user.id)}.jpg')
+    await Form.waiting_style.set()
+    await message.answer('Пожалуйста, пришлите фотографию c желаемым стилем'
+                         'Для отмены используйте /cancel')
+
+
+@dp.message_handler(state=Form.waiting_style, content_types=['photo'])
+async def process_style(message: types.Message, state: FSMContext):
+    await message.photo[-1].download(f'style/stl{str(message.from_user.id)}.jpg')
+    await process_magic(message)
+
+
+async def process_magic(message: types.Message):
+    content_path = f'content/cnt{str(message.from_user.id)}.jpg'
+    style_path = f'style/stl{str(message.from_user.id)}.jpg'
+    trans_path = f'transferred/image{str(message.from_user.id)}.jpg'
+
+    await message.answer("Я начал работать, подождите около 5 минут.")
+
+    model = StyleTransfer(content_path, style_path, message.from_user.id)
+    await model.transfer()
+    if os.path.isfile(trans_path):
+        await bot.send_photo(chat_id=message.from_user.id,
+                             photo=open(trans_path, 'rb'))
+    else:
+        await message.answer("Упс.. Ошибочка вышла.")
+    #await model.clear()
+
+
+@dp.message_handler(state='*', commands='cancel')
+@dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
+async def cancel_handler(message: types.Message, state: FSMContext):
+    """
+    Allow user to cancel any action
+    """
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+
+    logging.info('Cancelling state %r', current_state)
+    # Cancel state and inform user about it
+    await state.finish()
+    # And remove keyboard (just in case)
+    await message.reply('Отменено.', reply_markup=types.ReplyKeyboardRemove())
 
 
 def start():
