@@ -55,20 +55,21 @@ logging.basicConfig(level=logging.INFO)
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
-    await message.answer('Привет, я генерирую лица, у меня есть следующие команды:\n\
-/start, /help - вызвать это меню.\n\
-/generate - сгенерировать случайное лицо.\n')
+    await message.answer('Привет, я генерирую лица, у меня есть следующие команды:\n'
+                         '/start, /help - вызвать это меню.\n'
+                         '/generate - сгенерировать случайное лицо.\n'
+                         '/style - применить стиль одной фотографии к другой.\n')
 
 
 @dp.message_handler(commands=['generate'])
 async def generate(message: types.Message):
     generator = FaceGAN()
-    logging.debug('Generating')
+    logging.debug('Генерирую...')
     await generator.get_image()
     if os.path.isfile(f'faces/fake.jpg'):
         await bot.send_photo(chat_id=message.from_user.id, photo=open('faces/fake.jpg', 'rb'))
     else:
-        await message.answer("Didn't find the result")
+        await message.answer("Упс.. Ошибочка вышла.")
 
 
 async def on_startup(dp):
@@ -100,7 +101,7 @@ class Form(StatesGroup):
 @dp.message_handler(commands=['style'])
 async def send_welcome(message: types.Message):
     await Form.waiting_content.set()
-    await message.answer('Пожалуйста, пришлите фотографию для которой будем менять стиль.'
+    await message.answer('Пожалуйста, пришлите фотографию для которой будем менять стиль.\n'
                          'Для отмены используйте /cancel')
 
 
@@ -110,7 +111,7 @@ async def process_content(message: types.Message, state: FSMContext):
         os.makedirs('content')
     await message.photo[-1].download(f'content/cnt{str(message.from_user.id)}.jpg')
     await Form.waiting_style.set()
-    await message.answer('Пожалуйста, пришлите фотографию c желаемым стилем'
+    await message.answer('Пожалуйста, пришлите фотографию c желаемым стилем.\n'
                          'Для отмены используйте /cancel')
 
 
