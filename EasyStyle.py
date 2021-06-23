@@ -12,6 +12,7 @@ import copy
 import os
 
 from losses import Normalization, ContentLoss, StyleLoss
+import asyncio
 
 device = torch.device("cpu")
 
@@ -176,7 +177,8 @@ class StyleTransfer:
         self.std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
     async def transfer(self):
-        cnn = models.vgg19(pretrained=True).features.to(device).eval()
+        cnn = models.vgg19(pretrained=False).features.to(device).eval()
+        cnn.load_state_dict(torch.load('model_weights/vgg19_features.model'))
         output = run_style_transfer(cnn, self.mean, self.std, self.content_img, self.style_img,
                                     self.input_img, self.content_layers_default, self.style_layers_default)
         save_image(output, self.trans_path)
@@ -188,3 +190,8 @@ class StyleTransfer:
             os.remove(self.content_path)
         if os.path.isfile(self.style_path):
             os.remove(self.content_path)
+
+
+if __name__ == '__main__':
+    inst = StyleTransfer(f'content/cnt58369298.jpg', f'style/stl58369298.jpg', 58369298)
+    asyncio.get_event_loop().run_until_complete( inst.transfer() )
