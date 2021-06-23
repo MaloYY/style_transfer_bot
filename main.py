@@ -1,5 +1,7 @@
 import logging
 import os
+import threading
+import asyncio
 
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -13,7 +15,7 @@ from FaceGAN import FaceGAN
 from EasyStyle import StyleTransfer
 
 # Easier to test it with pooling
-MODE = 'DEPL'  # 'LOCAL'
+MODE = 'local'  # 'LOCAL'
 
 # configuration
 if MODE == 'DEPL':
@@ -132,14 +134,27 @@ async def process_magic(message: types.Message):
 
     await message.answer("Я начал работать, подождите около 5 минут.")
 
+    t = threading.Thread(target=lambda msg, content_ph, style_ph, trans_ph
+                         : asyncio.run(process_transfer(msg, content_ph, style_ph, trans_ph)),
+                         args=(message, content_path, style_path, trans_path))
+    t.start()
+    #await model.transfer()
+
+    #await model.clear()
+
+
+async def process_transfer(message: types.Message, content_path, style_path, trans_path):
     model = StyleTransfer(content_path, style_path, message.from_user.id)
     await model.transfer()
+
+    boto = Bot(token=API_TOKEN)
+
     if os.path.isfile(trans_path):
-        await bot.send_photo(chat_id=message.from_user.id,
+        await boto.send_photo(chat_id=message.from_user.id,
                              photo=open(trans_path, 'rb'))
     else:
         await message.answer("Упс.. Ошибочка вышла.")
-    #await model.clear()
+    await boto.close()
 
 
 @dp.message_handler(state='*', commands='cancel')
