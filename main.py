@@ -190,7 +190,7 @@ class FormSum2Win(StatesGroup):
 @dp.message_handler(commands=['sum2win'])
 async def send_welcome(message: types.Message):
     await FormSum2Win.waiting_content.set()
-    await message.answer('Пожалуйста, пришлите фотографию летней природы.\n'
+    await message.answer('Пожалуйста, пришлите фотографию летнего пейзажа.\n'
                          'Для отмены используйте /cancel')
 
 
