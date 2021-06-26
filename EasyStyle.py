@@ -177,8 +177,8 @@ class StyleTransfer:
         self.std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
     async def transfer(self):
-        cnn = models.vgg19(pretrained=False).features.to(device).eval()
-        cnn.load_state_dict(torch.load('model_weights/vgg19_features.model'))
+        cnn = models.vgg16(pretrained=False).features.to(device).eval()
+        cnn.load_state_dict(torch.load('model_weights/vgg16_features.model'))
         output = run_style_transfer(cnn, self.mean, self.std, self.content_img, self.style_img,
                                     self.input_img, self.content_layers_default, self.style_layers_default)
         save_image(output, self.trans_path)
