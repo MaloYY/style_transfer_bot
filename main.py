@@ -246,3 +246,7 @@ def start():
             dispatcher=dp,
             skip_updates=True
         )
+
+
+if __name__ == '__main__':
+    start()
