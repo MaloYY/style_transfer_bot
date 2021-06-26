@@ -153,7 +153,7 @@ async def process_magic(message: types.Message, state: FSMContext):
     style_path = f'style/stl{str(message.from_user.id)}.jpg'
     trans_path = f'transferred/image{str(message.from_user.id)}.jpg'
 
-    await message.answer("Я начал работать, подождите около 5 минут.")
+    await message.answer("Я начал работать, подождите около 20 минут.")
 
     t = threading.Thread(target=lambda msg, content_ph, style_ph, trans_ph
                          : asyncio.run(process_transfer(msg, content_ph, style_ph, trans_ph)),
@@ -188,7 +188,7 @@ class FormSum2Win(StatesGroup):
 @dp.message_handler(commands=['sum2win'])
 async def send_welcome(message: types.Message):
     await FormSum2Win.waiting_content.set()
-    await message.answer('Пожалуйста, пришлите фотографию для которой будем менять стиль.\n'
+    await message.answer('Пожалуйста, пришлите фотографию летней природы.\n'
                          'Для отмены используйте /cancel')
 
 
