@@ -80,7 +80,7 @@ async def send_welcome(message: types.Message):
     await message.answer('Привет, я генерирую лица, у меня есть следующие команды:\n'
                          '/start, /help - вызвать это меню.\n'
                          '/generate - сгенерировать случайное лицо.\n'
-                         '/style - применить стиль одной фотографии к другой.\n'
+                         '/style - применить стиль одной фотографии к другой. Это может занять до 35 минут.\n'
                          '/sum2win - превратить лето в зиму.\n')
 
 
@@ -125,6 +125,7 @@ class FormEasyStyle(StatesGroup):
 async def send_welcome(message: types.Message):
     await FormEasyStyle.waiting_content.set()
     await message.answer('Пожалуйста, пришлите фотографию для которой будем менять стиль.\n'
+                         'Это может занять до 35 минут.\n'
                          'Для отмены используйте /cancel')
 
 
@@ -135,6 +136,7 @@ async def process_content(message: types.Message):
     await message.photo[-1].download(f'content/cnt{str(message.from_user.id)}.jpg')
     await FormEasyStyle.waiting_style.set()
     await message.answer('Пожалуйста, пришлите фотографию c желаемым стилем.\n'
+                         'Это может занять до 35 минут.\n'
                          'Для отмены используйте /cancel')
 
 
@@ -153,7 +155,7 @@ async def process_magic(message: types.Message, state: FSMContext):
     style_path = f'style/stl{str(message.from_user.id)}.jpg'
     trans_path = f'transferred/image{str(message.from_user.id)}.jpg'
 
-    await message.answer("Я начал работать, подождите около 20 минут.")
+    await message.answer("Я начал работать, подождите около 30 минут.")
 
     t = threading.Thread(target=lambda msg, content_ph, style_ph, trans_ph
                          : asyncio.run(process_transfer(msg, content_ph, style_ph, trans_ph)),
