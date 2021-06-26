@@ -33,7 +33,6 @@ if MODE == 'DEPL':
     WEBAPP_PORT = int(os.getenv("PORT"))
 
     bot = Bot(token=API_TOKEN)
-    asyncio.get_event_loop().run_until_complete(bot.set_webhook(WEBHOOK_URL))
     dp = Dispatcher(bot, storage=MemoryStorage())
     dp.middleware.setup(LoggingMiddleware())
 else:
