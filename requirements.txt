@@ -4,6 +4,6 @@ async-timeout==3.0.1
 attrs==21.2.0
 numpy~=1.20.1
 -f https://download.pytorch.org/whl/torch_stable.html
-torch==1.9.0
-torchvision==0.10.0
+torch==1.9.0+cpu
+torchvision==0.9.1+cpu
 Pillow==8.1.0
