@@ -16,7 +16,7 @@ from EasyStyle import StyleTransfer
 from CycleGAN_dir.CycleGAN import Summer2Winter
 
 # Easier to test it with pooling
-MODE = 'DEPLo'  # 'LOCAL'
+MODE = 'DEPL'  # 'LOCAL'
 
 # configuration
 if MODE == 'DEPL':
