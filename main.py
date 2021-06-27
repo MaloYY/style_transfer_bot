@@ -58,21 +58,17 @@ logging.basicConfig(level=logging.INFO)
 async def on_startup(dp):
     logging.warning('Starting connection.')
     if MODE == 'DEPL':
+        await bot.delete_webhook()
         await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
 
 
 async def on_shutdown(dp):
     logging.warning('Shutting down..')
-
-    # Remove webhook (not acceptable in some cases)
-    if MODE == 'DEPL':
-        await bot.delete_webhook()
-
     # Close DB connection (if used)
     await dp.storage.close()
     await dp.storage.wait_closed()
 
-    logging.warning('Bye! Shutting down webhook connection')
+    logging.warning('Bye!')
 
 
 @dp.message_handler(commands=['start', 'help'])
