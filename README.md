@@ -32,3 +32,7 @@
 ## Дополнение
 
 Сделал через BotFather своему боту описание, аватарку и добавил команды в список команд.
+
+## Скриншоты работы
+
+![alt text](https://github.com/MaloYY/style_transfer_bot/blob/master/images/bot_works.png)
