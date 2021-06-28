@@ -5,14 +5,13 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 import numpy as np
-import asyncio
 import os
 
-from CycleGAN_dir.ResNet import ResnetGenerator
+from models.CycleGAN_dir.ResNet import ResnetGenerator
 
 device = torch.device("cpu")
 
-WEIGHTS = 'model_weights/G_A4.374477.model'
+WEIGHTS = 'models/model_weights/G_A4.374477.model'
 
 
 def _patch_instance_norm_state_dict(state_dict, module, keys, i=0):
@@ -96,11 +95,13 @@ class Summer2Winter:
         im.save(self.fake_path)
 
     async def clear(self):
+        if os.path.isfile(self.real_path):
+            os.remove(self.real_path)
         if os.path.isfile(self.fake_path):
             os.remove(self.fake_path)
 
 
 if __name__ == '__main__':
-    inst = Summer2Winter('real/kartinki24_ru_summer_124.jpg', 'fake/kartinki24_ru_summer_124.jpg')
+    inst = Summer2Winter('models/CycleGAN_dir/real/kartinki24_ru_summer_124.jpg', 'models/CycleGAN_dir/fake/kartinki24_ru_summer_124.jpg')
     # use it for weights: WEIGHTS = '../model_weights/G_A4.374477.model'
     # asyncio.run(inst.clear())

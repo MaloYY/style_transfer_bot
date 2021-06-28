@@ -11,7 +11,7 @@ from torchvision.utils import save_image
 import copy
 import os
 
-from losses import Normalization, ContentLoss, StyleLoss
+from models.EasyStyle_dir.losses import Normalization, ContentLoss, StyleLoss
 import asyncio
 
 device = torch.device("cpu")
@@ -158,13 +158,13 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
 
 
 class StyleTransfer:
-    def __init__(self, content_path, style_path, user_id):
+    def __init__(self, content_path, style_path, trans_path, user_id):
         self.user_id = user_id
         self.imsize = 128
 
         self.content_path = content_path
         self.style_path = style_path
-        self.trans_path = f'transferred/image{str(self.user_id)}.jpg'
+        self.trans_path = trans_path
 
         self.content_img = image_loader(content_path, self.imsize)  # as well as here
         self.style_img = image_loader(style_path, self.imsize)  # измените путь на тот который у вас.
@@ -178,7 +178,7 @@ class StyleTransfer:
 
     async def transfer(self):
         cnn = models.vgg16(pretrained=False).features.to(device).eval()
-        cnn.load_state_dict(torch.load('model_weights/vgg16_features.model'))
+        cnn.load_state_dict(torch.load('models/model_weights/vgg16_features.model'))
         output = run_style_transfer(cnn, self.mean, self.std, self.content_img, self.style_img,
                                     self.input_img, self.content_layers_default, self.style_layers_default)
         save_image(output, self.trans_path)
@@ -195,5 +195,5 @@ class StyleTransfer:
 
 
 if __name__ == '__main__':
-    inst = StyleTransfer(f'content/cnt58369298.jpg', f'style/stl58369298.jpg', 58369298)
+    inst = StyleTransfer(f'EasyStyle_dir/content/cnt58369298.jpg', f'EasyStyle_dir/style/stl58369298.jpg', 58369298)
     asyncio.get_event_loop().run_until_complete( inst.transfer() )

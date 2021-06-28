@@ -11,12 +11,12 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import Text
 from aiogram.utils.executor import start_webhook, start_polling
 
-from FaceGAN import FaceGAN
-from EasyStyle import StyleTransfer
-from CycleGAN_dir.CycleGAN import Summer2Winter
+from models.FaceGAN_dir.FaceGAN import FaceGAN
+from models.EasyStyle_dir.EasyStyle import StyleTransfer
+from models.CycleGAN_dir.CycleGAN import Summer2Winter
 
 # Easier to test it with pooling
-MODE = 'DEPL'  # 'LOCAL'
+MODE = 'DEPLo'  # 'LOCAL'
 
 # configuration
 if MODE == 'DEPL':
@@ -86,8 +86,8 @@ async def generate(message: types.Message):
     generator = FaceGAN()
     logging.debug('Генерирую...')
     await generator.get_image()
-    if os.path.isfile(f'faces/fake.jpg'):
-        await bot.send_photo(chat_id=message.from_user.id, photo=open('faces/fake.jpg', 'rb'))
+    if os.path.isfile(f'models/FaceGAN_dir/faces/fake.jpg'):
+        await bot.send_photo(chat_id=message.from_user.id, photo=open('models/FaceGAN_dir/faces/fake.jpg', 'rb'))
     else:
         await message.answer("Упс.. Ошибочка вышла.")
 
@@ -127,9 +127,9 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler(state=FormEasyStyle.waiting_content, content_types=['photo'])
 async def process_content(message: types.Message):
-    if not os.path.exists(f'content'):
-        os.makedirs('content')
-    await message.photo[-1].download(f'content/cnt{str(message.from_user.id)}.jpg')
+    if not os.path.exists(f'models/EasyStyle_dir/content'):
+        os.makedirs('models/EasyStyle_dir/content')
+    await message.photo[-1].download(f'models/EasyStyle_dir/content/cnt{str(message.from_user.id)}.jpg')
     await FormEasyStyle.waiting_style.set()
     await message.answer('Пожалуйста, пришлите фотографию c желаемым стилем.\n'
                          'Это может занять до 35 минут.\n'
@@ -138,18 +138,18 @@ async def process_content(message: types.Message):
 
 @dp.message_handler(state=FormEasyStyle.waiting_style, content_types=['photo'])
 async def process_style(message: types.Message, state: FSMContext):
-    if not os.path.exists(f'style'):
-        os.makedirs('style')
-    await message.photo[-1].download(f'style/stl{str(message.from_user.id)}.jpg')
+    if not os.path.exists(f'models/EasyStyle_dir/style'):
+        os.makedirs('models/EasyStyle_dir/style')
+    await message.photo[-1].download(f'models/EasyStyle_dir/style/stl{str(message.from_user.id)}.jpg')
     await process_magic(message, state)
 
 
 async def process_magic(message: types.Message, state: FSMContext):
-    if not os.path.exists(f'transferred'):
-        os.makedirs('transferred')
-    content_path = f'content/cnt{str(message.from_user.id)}.jpg'
-    style_path = f'style/stl{str(message.from_user.id)}.jpg'
-    trans_path = f'transferred/image{str(message.from_user.id)}.jpg'
+    if not os.path.exists(f'models/EasyStyle_dir/transferred'):
+        os.makedirs('models/EasyStyle_dir/transferred')
+    content_path = f'models/EasyStyle_dir/content/cnt{str(message.from_user.id)}.jpg'
+    style_path = f'models/EasyStyle_dir/style/stl{str(message.from_user.id)}.jpg'
+    trans_path = f'models/EasyStyle_dir/transferred/image{str(message.from_user.id)}.jpg'
 
     await message.answer("Я начал работать, подождите около 30 минут.")
 
@@ -161,7 +161,7 @@ async def process_magic(message: types.Message, state: FSMContext):
 
 
 async def process_transfer(message: types.Message, content_path, style_path, trans_path):
-    model = StyleTransfer(content_path, style_path, message.from_user.id)
+    model = StyleTransfer(content_path, style_path, trans_path, message.from_user.id)
     await model.transfer()
 
     boto = Bot(token=API_TOKEN)
@@ -192,17 +192,17 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler(state=FormSum2Win.waiting_content, content_types=['photo'])
 async def process_content(message: types.Message, state: FSMContext):
-    if not os.path.exists(f'real'):
-        os.makedirs('real')
-    await message.photo[-1].download(f'real/cnt{str(message.from_user.id)}.jpg')
+    if not os.path.exists(f'models/CycleGAN_dir/real'):
+        os.makedirs('models/CycleGAN_dir/real')
+    await message.photo[-1].download(f'models/CycleGAN_dir/real/cnt{str(message.from_user.id)}.jpg')
     await process_make_it_winter(message, state)
 
 
 async def process_make_it_winter(message: types.Message, state: FSMContext):
-    if not os.path.exists(f'fake'):
-        os.makedirs('fake')
-    content_path = f'real/cnt{str(message.from_user.id)}.jpg'
-    trans_path = f'fake/image{str(message.from_user.id)}.jpg'
+    if not os.path.exists(f'models/CycleGAN_dir/fake'):
+        os.makedirs('models/CycleGAN_dir/fake')
+    content_path = f'models/CycleGAN_dir/real/cnt{str(message.from_user.id)}.jpg'
+    trans_path = f'models/CycleGAN_dir/fake/image{str(message.from_user.id)}.jpg'
 
     await message.answer("Я начал работать, подождите пару минут.")
 
