@@ -16,10 +16,11 @@ from models.EasyStyle_dir.EasyStyle import StyleTransfer
 from models.CycleGAN_dir.CycleGAN import Summer2Winter
 
 # Easier to test it with pooling
-MODE = os.getenv('HEROKU')
+MODE = str(os.getenv('HEROKU'))
 
 # configuration
 if MODE == 'DEPL':
+    # webhook
     API_TOKEN = str(os.getenv('BOT_TOKEN'))
     HEROKU_APP_NAME = str(os.getenv('HEROKU_APP_NAME'))
 
@@ -36,17 +37,9 @@ if MODE == 'DEPL':
     dp = Dispatcher(bot, storage=MemoryStorage())
     dp.middleware.setup(LoggingMiddleware())
 else:
+    # polling
     API_TOKEN = str(os.getenv('BOT_TOKEN'))
     HEROKU_APP_NAME = str(os.getenv('HEROKU_APP_NAME'))
-
-    # webhook settings
-    WEBHOOK_HOST = f'https://{HEROKU_APP_NAME}.herokuapp.com'
-    WEBHOOK_PATH = f'/webhook/{API_TOKEN}'
-    WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
-
-    # webserver settings
-    WEBAPP_HOST = '0.0.0.0'  # or ip
-    WEBAPP_PORT = 3001
 
     bot = Bot(token=API_TOKEN)
     dp = Dispatcher(bot, storage=MemoryStorage())
@@ -111,7 +104,9 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
 # Easy_style_transfer start
 
-
+# start -> waiting_content -(got a picture)-> waiting_style -(got a picture)-> (running) -> finish (gives the answer)
+#                          \                       \
+#                           -> finish (canceled)    -> finish (canceled)
 class FormEasyStyle(StatesGroup):
     waiting_content = State()
     waiting_style = State()
@@ -141,6 +136,7 @@ async def process_style(message: types.Message, state: FSMContext):
     if not os.path.exists(f'models/EasyStyle_dir/style'):
         os.makedirs('models/EasyStyle_dir/style')
     await message.photo[-1].download(f'models/EasyStyle_dir/style/stl{str(message.from_user.id)}.jpg')
+    # runs the model and sends an answer
     await process_magic(message, state)
 
 
@@ -153,6 +149,7 @@ async def process_magic(message: types.Message, state: FSMContext):
 
     await message.answer("Я начал работать, подождите около 30 минут.")
 
+    # avoiding timeouts
     t = threading.Thread(target=lambda msg, content_ph, style_ph, trans_ph
                          : asyncio.run(process_transfer(msg, content_ph, style_ph, trans_ph)),
                          args=(message, content_path, style_path, trans_path))
@@ -178,7 +175,9 @@ async def process_transfer(message: types.Message, content_path, style_path, tra
 # Easy_style_transfer end
 # CycleGAN_dir transfer start
 
-
+# start -> waiting_content -(got a picture)-> (running) -> finish (gives the answer)
+#                          \
+#                           -> finish (canceled)
 class FormSum2Win(StatesGroup):
     waiting_content = State()
 
@@ -195,6 +194,7 @@ async def process_content(message: types.Message, state: FSMContext):
     if not os.path.exists(f'models/CycleGAN_dir/real'):
         os.makedirs('models/CycleGAN_dir/real')
     await message.photo[-1].download(f'models/CycleGAN_dir/real/cnt{str(message.from_user.id)}.jpg')
+    # runs the model and sends an answer
     await process_make_it_winter(message, state)
 
 
@@ -206,6 +206,7 @@ async def process_make_it_winter(message: types.Message, state: FSMContext):
 
     await message.answer("Я начал работать, подождите пару минут.")
 
+    # avoiding timeouts
     t = threading.Thread(target=lambda msg, content_ph, trans_ph
                          : asyncio.run(process_winter_transfer(msg, content_ph, trans_ph)),
                          args=(message, content_path, trans_path))
@@ -230,6 +231,7 @@ async def process_winter_transfer(message: types.Message, content_path, trans_pa
 
 def start():
     if MODE == 'DEPL':
+        # I use a webhook at heroku
         start_webhook(
             dispatcher=dp,
             webhook_path=WEBHOOK_PATH,
@@ -240,6 +242,7 @@ def start():
             port=WEBAPP_PORT,
         )
     else:
+        # and a polling locally
         start_polling(
             dispatcher=dp,
             skip_updates=True
