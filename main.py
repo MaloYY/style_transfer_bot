@@ -16,7 +16,7 @@ from models.EasyStyle_dir.EasyStyle import StyleTransfer
 from models.CycleGAN_dir.CycleGAN import Summer2Winter
 
 # Easier to test it with pooling
-MODE = 'DEPLo'  # 'LOCAL'
+MODE = os.getenv('HEROKU')
 
 # configuration
 if MODE == 'DEPL':
