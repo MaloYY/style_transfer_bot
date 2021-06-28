@@ -18,6 +18,11 @@ device = torch.device("cpu")
 
 
 def image_loader(image_name, imsize):
+    """Loads an image and transforms it.
+    Parameters:
+        image_name (str) --  the input image path
+        imsize (int)     --  the input image size
+    """
     loader = transforms.Compose([
         transforms.Resize(imsize),  # нормируем размер изображения
         transforms.CenterCrop(imsize),
@@ -86,10 +91,6 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
             break
 
     model = model[:(i + 1)]
-
-    #model.load_state_dict(torch.load('model_weights/EasyST.model'))
-    #model = torch.load('model_weights/EasyST1.model')
-    #model.eval()
 
     return model, style_losses, content_losses
 
@@ -177,8 +178,10 @@ class StyleTransfer:
         self.std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
     async def transfer(self):
+        # load
         cnn = models.vgg16(pretrained=False).features.to(device).eval()
         cnn.load_state_dict(torch.load('models/model_weights/vgg16_features.model'))
+
         output = run_style_transfer(cnn, self.mean, self.std, self.content_img, self.style_img,
                                     self.input_img, self.content_layers_default, self.style_layers_default)
         save_image(output, self.trans_path)

@@ -1,5 +1,4 @@
 import os
-import asyncio
 import torch
 import torch.nn as nn
 from torchvision.utils import save_image
@@ -55,17 +54,23 @@ class FaceGAN:
         self.model.eval()
 
     async def get_image(self):
+        """Generating a random tensor,
+         passing through the model and saving the picture"""
+
+        # generating
         fixed_latent = torch.randn(1, 512, 1, 1, device=self.device)
 
         with torch.no_grad():
+            # passing through
             fake_images = self.model(fixed_latent)
+            # saving
             save_image(fake_images, f'models/FaceGAN_dir/faces/fake.jpg')
 
-        await asyncio.sleep(0)
 
     async def remove_image(self):
         if os.path.isfile(f'models/FaceGAN_dir/faces/fake.jpg'):
             os.remove(f'models/FaceGAN_dir/faces/fake.jpg')
+
 
 if __name__ == '__main__':
     inst = FaceGAN()

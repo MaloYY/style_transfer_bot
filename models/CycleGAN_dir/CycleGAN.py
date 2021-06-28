@@ -50,10 +50,15 @@ def tensor2im(input_image, imtype=np.uint8):
 
 
 def image_loader(image_name, imsize):
+    """Loads an image and transforms it.
+    Parameters:
+        image_name (str) --  the input image path
+        imsize (int)     --  the input image size
+    """
     loader = transforms.Compose([
-        transforms.Resize(imsize),  # нормируем размер изображения
+        transforms.Resize(imsize),
         transforms.CenterCrop(imsize),
-        transforms.ToTensor()])  # превращаем в удобный формат
+        transforms.ToTensor()])
 
     image = Image.open(image_name)
     image = loader(image).unsqueeze(0)
@@ -62,8 +67,10 @@ def image_loader(image_name, imsize):
 
 class Summer2Winter:
     def __init__(self, real_path, fake_path):
+        # image size
         self.imsize = 256
 
+        # setting paths
         self.real_path = real_path
         self.fake_path = fake_path
 
@@ -73,6 +80,7 @@ class Summer2Winter:
         self.load_networks()
 
     def load_networks(self):
+        """Loads the model weights"""
         state_dict = torch.load(WEIGHTS, map_location=torch.device('cpu'))
 
         if hasattr(state_dict, '_metadata'):
@@ -97,11 +105,12 @@ class Summer2Winter:
     async def clear(self):
         if os.path.isfile(self.real_path):
             os.remove(self.real_path)
+
         if os.path.isfile(self.fake_path):
             os.remove(self.fake_path)
 
 
 if __name__ == '__main__':
-    inst = Summer2Winter('models/CycleGAN_dir/real/kartinki24_ru_summer_124.jpg', 'models/CycleGAN_dir/fake/kartinki24_ru_summer_124.jpg')
+    inst = Summer2Winter('models/CycleGAN_dir/real/<PHOTO NAME>', 'models/CycleGAN_dir/fake/<PHOTO NAME>')
     # use it for weights: WEIGHTS = '../model_weights/G_A4.374477.model'
     # asyncio.run(inst.clear())
