@@ -35,4 +35,4 @@
 
 ## Скриншоты работы
 
-![alt text](https://github.com/MaloYY/style_transfer_bot/blob/master/images/bot_works.png)
+![alt text](https://github.com/MaloYY/style_transfer_bot/blob/master/images/bot_works_t.png)

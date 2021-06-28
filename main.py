@@ -66,7 +66,7 @@ async def on_shutdown(dp):
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
-    await message.answer('Привет, я генерирую лица, у меня есть следующие команды:\n'
+    await message.answer('Привет, у меня есть следующие команды:\n'
                          '/start, /help - вызвать это меню.\n'
                          '/generate - сгенерировать случайное лицо.\n'
                          '/style - применить стиль одной фотографии к другой. Это может занять до 35 минут.\n'
